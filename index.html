@@ -159,7 +159,7 @@ header{background:var(--bg);border-bottom:1px solid var(--border);padding:.875re
       <button class="juror-btn" onclick="login('Guillaume')">Guillaume</button>
       <button class="juror-btn" onclick="login('Samir')">Samir</button>
       <button class="juror-btn" onclick="login('Adrien')">Adrien</button>
-      <button class="juror-btn admin-btn" onclick="login('ADMIN')">★ Vue Admin</button>
+      <button class="juror-btn admin-btn" onclick="showPasswordModal()">★ Vue Admin</button>
     </div>
   </div>
 </div>
@@ -198,6 +198,24 @@ header{background:var(--bg);border-bottom:1px solid var(--border);padding:.875re
     <div class="reset-zone">
       <p>⚠️ Réinitialiser supprime définitivement toutes les notes.</p>
       <button class="reset-btn" onclick="showResetModal()">🗑 Réinitialiser les votes</button>
+    </div>
+  </div>
+</div>
+
+<!-- PASSWORD MODAL -->
+<div class="modal-overlay" id="passwordModal" style="display:none">
+  <div class="modal-box">
+    <h3 style="color:var(--gold)">★ Accès Admin</h3>
+    <p>Entre le mot de passe pour accéder à la vue admin.</p>
+    <input type="password" id="adminPasswordInput"
+      placeholder="Mot de passe..."
+      style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:10px 14px;font-size:14px;font-family:inherit;margin-bottom:12px;outline:none"
+      onkeydown="if(event.key==='Enter') checkAdminPassword()"
+    >
+    <div id="passwordError" style="color:#e63329;font-size:12px;margin-bottom:12px;display:none">Mot de passe incorrect.</div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="hidePasswordModal()">Annuler</button>
+      <button class="modal-confirm" style="background:var(--gold)" onclick="checkAdminPassword()">Accéder</button>
     </div>
   </div>
 </div>
@@ -520,6 +538,28 @@ function renderAdmin() {
       '</div>';
   }
   document.getElementById('podiumList').innerHTML = phtml || '<p style="color:var(--muted);font-size:13px;">En attente des premières notes complètes…</p>';
+}
+
+// ── ADMIN PASSWORD ──
+function showPasswordModal() {
+  document.getElementById('adminPasswordInput').value = '';
+  document.getElementById('passwordError').style.display = 'none';
+  document.getElementById('passwordModal').style.display = 'flex';
+  setTimeout(function() { document.getElementById('adminPasswordInput').focus(); }, 100);
+}
+function hidePasswordModal() {
+  document.getElementById('passwordModal').style.display = 'none';
+}
+function checkAdminPassword() {
+  var val = document.getElementById('adminPasswordInput').value;
+  if (val === 'thomas') {
+    hidePasswordModal();
+    login('ADMIN');
+  } else {
+    document.getElementById('passwordError').style.display = 'block';
+    document.getElementById('adminPasswordInput').value = '';
+    document.getElementById('adminPasswordInput').focus();
+  }
 }
 
 // ── RESET ──
