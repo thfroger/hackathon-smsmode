@@ -253,6 +253,43 @@ header {
 .team-pick-status .dot.green { background: var(--green); }
 .team-pick-score { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--accent2); }
 
+/* Team info card */
+.team-info-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+.team-info-name {
+  font-family: 'Space Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.team-info-subject {
+  font-size: 13px;
+  color: var(--accent2);
+  line-height: 1.5;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.team-info-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.member-chip {
+  font-size: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 99px;
+  padding: 3px 10px;
+  color: var(--muted);
+}
+
 /* Back button */
 .back-btn {
   background: none; border: 1px solid var(--border2);
@@ -354,8 +391,8 @@ header {
 <!-- JURY SCORING -->
 <div id="juryScreen" class="screen">
   <button class="back-btn" onclick="backToPicker()">← Retour aux équipes</button>
-  <h1 class="page-title" id="scoringTeamTitle"></h1>
-  <p class="page-sub" id="jurySubtitle"></p>
+  <div class="team-info-card" id="teamInfoCard"></div>
+  <p class="page-sub" id="jurySubtitle">Note chaque critère de 1 à 4 étoiles</p>
   <div class="criteria" id="criteriaList"></div>
   <div class="team-result" id="teamResult"></div>
 </div>
@@ -406,6 +443,40 @@ const db = firebase.database();
 
 const JURORS = ['Ludovic', 'Laurent', 'Guillaume', 'Samir', 'Adrien'];
 const TEAMS  = ['Équipe 1','Équipe 2','Équipe 3','Équipe 4','Équipe 5','Équipe 6','Équipe 7','Équipe 8'];
+const TEAM_INFO = {
+  'Équipe 1': {
+    members: ['André RODRIGUES CRUZ','Achraf NAIT BELKACEM','Esteban KENZI','Matis FARDEAU','Nathan MUZAY'],
+    subject: 'Assistant de prise de rendez-vous RCS — Permettre à un client de réserver un créneau directement depuis son appli Messages, sans application tierce, sans formulaire web.'
+  },
+  'Équipe 2': {
+    members: ['Nicolas DUHAMEL','Hugo BELALOUI','Nelson GRAC-AUBERT','Zied ROUROU','Mounir MEROUANE'],
+    subject: 'Générateur de messages RCS OTP — Remplacer le bon vieux SMS de vérification par un message RCS riche : plus sécurisé, plus lisible, plus brandé.'
+  },
+  'Équipe 3': {
+    members: ['Léo POLIZZI','Alexis BONNARD','Milo BOUSQUET','Axel LE STRAT','Mathis ROUSSEL FRANCQUEVILLE'],
+    subject: 'Agent service client RCS (IA légère) — Un bot de service client qui répond aux questions fréquentes, directement dans le fil RCS.'
+  },
+  'Équipe 4': {
+    members: ['Victor BROUSSILLON','Nesrine MESSAOUDI','Ines CELIK','Adrien COLAS'],
+    subject: 'Agent service client RCS (IA légère) — Un bot de service client qui répond aux questions fréquentes, directement dans le fil RCS.'
+  },
+  'Équipe 5': {
+    members: ['Karim IBRAHIMI','Yanniss BOUZID','César ORTIZ','Anthony ROVERE NJERI','Thomas ROBIN'],
+    subject: 'Workflow builder — Une interface permettant de scénariser une conversation : « Si l\'utilisateur clique sur A, alors envoi de message X ».'
+  },
+  'Équipe 6': {
+    members: ['Jérémie NAGI','Hatim OUAADI','Marwan ROUISSI','Tristan EL BASRI','Séverine AUBUT'],
+    subject: 'Générateur de messages RCS OTP — Remplacer le bon vieux SMS de vérification par un message RCS riche : plus sécurisé, plus lisible, plus brandé.'
+  },
+  'Équipe 7': {
+    members: ['Audrey CHIARAMONTE','Yang ZHENG','Kathleen CHAIFFRE','Jean-Baptiste DHO','Walid ZIANI'],
+    subject: 'Workflow builder — Une interface permettant de scénariser une conversation : « Si l\'utilisateur clique sur A, alors envoi de message X ».'
+  },
+  'Équipe 8': {
+    members: ['Mehdi BERRAHO','Alexandre CHEVALIER','Matan AZIZA','Willyam RIBIERE','Sébastien LUCAS'],
+    subject: 'Assistant de prise de rendez-vous RCS — Permettre à un client de réserver un créneau directement depuis son appli Messages, sans application tierce, sans formulaire web.'
+  },
+};
 const CRITERIA = [
   { key: 'poc',   name: 'Fonctionnalité du POC',       weight: 0.30, desc: 'Le scénario de bout en bout fonctionne-t-il ?' },
   { key: 'tech',  name: 'Qualité technique',            weight: 0.20, desc: "Code lisible, architecture cohérente, gestion des cas d'erreur" },
