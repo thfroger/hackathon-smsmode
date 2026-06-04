@@ -588,6 +588,25 @@ function getBadge(score) {
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
+
+// ── RESET ──
+function showResetModal() {
+  document.getElementById('resetModal').style.display = 'flex';
+}
+function hideResetModal() {
+  document.getElementById('resetModal').style.display = 'none';
+}
+function confirmReset() {
+  db.ref('scores').remove()
+    .then(() => {
+      hideResetModal();
+      allScores = {};
+      renderAdmin();
+    })
+    .catch(err => {
+      alert('Erreur : ' + err.message);
+    });
+}
 </script>
 </body>
 </html>
