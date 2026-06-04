@@ -224,6 +224,40 @@ header {
   0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
 }
 
+/* ── TEAM PICKER ── */
+#teamPickerScreen { max-width: 700px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+.picker-title { font-family: 'Space Mono', monospace; font-size: 20px; margin-bottom: 6px; }
+.picker-sub { font-size: 13px; color: var(--muted); margin-bottom: 2rem; }
+.teams-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px; margin-bottom: 2rem;
+}
+.team-pick-btn {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.25rem 1rem;
+  cursor: pointer; transition: all 0.15s; text-align: left;
+  font-family: inherit; color: var(--text);
+  display: flex; flex-direction: column; gap: 8px;
+  position: relative;
+}
+.team-pick-btn:hover { border-color: var(--accent2); background: rgba(74,157,181,0.06); }
+.team-pick-btn.done { border-color: rgba(92,184,92,0.5); background: rgba(92,184,92,0.05); }
+.team-pick-name { font-size: 15px; font-weight: 600; }
+.team-pick-status { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+.team-pick-status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
+.team-pick-status .dot.green { background: var(--green); }
+.team-pick-score { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--accent2); }
+
+/* Back button */
+.back-btn {
+  background: none; border: 1px solid var(--border2);
+  color: var(--muted); border-radius: 8px; padding: 6px 14px;
+  font-family: inherit; font-size: 13px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-bottom: 1.5rem;
+}
+.back-btn:hover { color: var(--text); border-color: var(--text); }
+
 .reset-zone {
   margin-top: 2.5rem;
   padding-top: 2rem;
@@ -303,12 +337,19 @@ header {
   </div>
 </div>
 
+<!-- TEAM PICKER -->
+<div id="teamPickerScreen" class="screen">
+  <h1 class="picker-title" id="pickerTitle"></h1>
+  <p class="picker-sub">Sélectionne une équipe à noter</p>
+  <div class="progress-bar" style="margin-bottom:1.5rem"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="teams-grid" id="teamsGrid"></div>
+</div>
+
 <!-- JURY SCORING -->
 <div id="juryScreen" class="screen">
-  <h1 class="page-title">&lt; jury.score() &gt;</h1>
+  <button class="back-btn" onclick="backToPicker()">← Retour aux équipes</button>
+  <h1 class="page-title" id="scoringTeamTitle"></h1>
   <p class="page-sub" id="jurySubtitle"></p>
-  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-  <div class="teams-nav" id="teamsNav"></div>
   <div class="criteria" id="criteriaList"></div>
   <div class="team-result" id="teamResult"></div>
 </div>
@@ -383,18 +424,32 @@ function login(name) {
     startAdminListener();
   } else {
     headerRight.innerHTML = `<span class="juror-badge">${name}</span><button class="logout-btn" onclick="logout()">Déconnexion</button>`;
-    document.getElementById('juryScreen').classList.add('active');
-    document.getElementById('jurySubtitle').textContent = `Bonjour ${name} — note chaque équipe sur 4 par critère`;
+    document.getElementById('pickerTitle').textContent = `Bonjour ${name} 👋`;
+    document.getElementById('teamPickerScreen').classList.add('active');
     startJuryListener(name);
-    renderTeamsNav();
-    renderCriteria();
   }
+}
+
+function selectTeam(teamName) {
+  activeTeam = teamName;
+  document.getElementById('teamPickerScreen').classList.remove('active');
+  document.getElementById('juryScreen').classList.add('active');
+  document.getElementById('scoringTeamTitle').textContent = teamName;
+  document.getElementById('jurySubtitle').textContent = 'Note chaque critère de 1 à 4 étoiles';
+  renderCriteria();
+  renderTeamResult();
+}
+
+function backToPicker() {
+  document.getElementById('juryScreen').classList.remove('active');
+  document.getElementById('teamPickerScreen').classList.add('active');
+  renderTeamPicker();
 }
 
 function logout() {
   currentUser = null;
   activeTeam = TEAMS[0];
-  ['loginScreen','juryScreen','adminScreen'].forEach(id => {
+  ['loginScreen','juryScreen','teamPickerScreen','adminScreen'].forEach(id => {
     document.getElementById(id).classList.remove('active');
   });
   document.getElementById('loginScreen').classList.add('active');
@@ -405,10 +460,13 @@ function logout() {
 function startJuryListener(juror) {
   db.ref(`scores/${juror}`).on('value', snap => {
     allScores[juror] = snap.val() || {};
-    renderTeamsNav();
-    renderCriteria();
-    renderTeamResult();
+    renderTeamPicker();
     updateProgress();
+    // If already on scoring screen, refresh it too
+    if (document.getElementById('juryScreen').classList.contains('active')) {
+      renderCriteria();
+      renderTeamResult();
+    }
   });
 }
 
@@ -427,26 +485,29 @@ function setScore(team, key, val) {
   db.ref(`scores/${juror}/${team}/${key}`).set(newVal);
 }
 
-// ── JURY: team tabs ──
-function renderTeamsNav() {
+// ── JURY: team picker ──
+function renderTeamPicker() {
   const juror = currentUser;
-  const nav = document.getElementById('teamsNav');
-  nav.innerHTML = TEAMS.map(t => {
+  const grid = document.getElementById('teamsGrid');
+  if (!grid) return;
+  let doneCount = 0;
+  grid.innerHTML = TEAMS.map(t => {
     const teamScores = allScores[juror]?.[t] || {};
     const done = CRITERIA.every(c => (teamScores[c.key] || 0) > 0);
+    if (done) doneCount++;
+    let score = 0;
+    CRITERIA.forEach(c => { score += (teamScores[c.key] || 0) * c.weight; });
+    score = score * 5;
     return `
-      <div class="team-tab ${t === activeTeam ? 'active' : ''}" onclick="switchTeam('${esc(t)}')">
-        ${esc(t)}
-        ${done ? '<span class="done-dot" title="Noté"></span>' : ''}
-      </div>`;
+      <button class="team-pick-btn ${done ? 'done' : ''}" onclick="selectTeam('${esc(t)}')">
+        <span class="team-pick-name">${esc(t)}</span>
+        <span class="team-pick-status">
+          <span class="dot ${done ? 'green' : ''}"></span>
+          ${done ? 'Noté' : 'À noter'}
+        </span>
+        ${done ? `<span class="team-pick-score">${score.toFixed(2)} / 20</span>` : ''}
+      </button>`;
   }).join('');
-}
-
-function switchTeam(name) {
-  activeTeam = name;
-  renderTeamsNav();
-  renderCriteria();
-  renderTeamResult();
 }
 
 // ── JURY: criteria ──
@@ -500,7 +561,8 @@ function updateProgress() {
   TEAMS.forEach(t => {
     if (CRITERIA.every(c => (allScores[juror]?.[t]?.[c.key] || 0) > 0)) done++;
   });
-  document.getElementById('progressFill').style.width = `${Math.round(done / TEAMS.length * 100)}%`;
+  const el = document.getElementById('progressFill');
+  if (el) el.style.width = `${Math.round(done / TEAMS.length * 100)}%`;
 }
 
 // ── ADMIN ──
