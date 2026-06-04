@@ -500,11 +500,17 @@ function login(name) {
     headerRight.innerHTML = `<span class="juror-badge">★ Admin</span><button class="logout-btn" onclick="logout()">Déconnexion</button>`;
     slideTo('loginScreen', 'adminScreen');
     startAdminListener();
+    setTimeout(() => {
+      document.getElementById('adminScreen').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
   } else {
     headerRight.innerHTML = `<span class="juror-badge">${name}</span><button class="logout-btn" onclick="logout()">Déconnexion</button>`;
     document.getElementById('pickerTitle').textContent = `Bonjour ${name} 👋`;
     slideTo('loginScreen', 'teamPickerScreen');
     startJuryListener(name);
+    setTimeout(() => {
+      document.getElementById('teamPickerScreen').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
   }
 }
 
