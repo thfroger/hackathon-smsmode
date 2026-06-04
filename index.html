@@ -414,28 +414,25 @@ function backToPicker() {
 // ── CRITERIA ──
 function renderCriteria() {
   var ts = allScores[currentUser] && allScores[currentUser][activeTeam] ? allScores[currentUser][activeTeam] : {};
-  var html = '';
+  var out = '';
   for (var i = 0; i < CRITERIA.length; i++) {
     var c = CRITERIA[i];
     var val = ts[c.key] || 0;
     var contrib = (val * c.weight * 5).toFixed(2);
     var stars = '';
     for (var n = 1; n <= 4; n++) {
-      stars += '<button class="star-btn' + (val >= n ? ' active' : '') + '" onclick="setScore('' + team_esc(activeTeam) + '','' + c.key + '',' + n + ')">' + (val >= n ? '★' : '☆') + '</button>';
+      stars += '<button class="star-btn' + (val >= n ? ' active' : '') + '" data-key="' + c.key + '" data-n="' + n + '">' + (val >= n ? '★' : '☆') + '</button>';
     }
-    html += '<div class="criterion">' +
+    out += '<div class="criterion">' +
       '<div class="criterion-head"><span class="criterion-name">' + esc(c.name) + '</span><span class="criterion-badge">' + Math.round(c.weight*100) + '%</span></div>' +
       '<div class="criterion-desc">' + esc(c.desc) + '</div>' +
       '<div class="stars-row"><div class="stars">' + stars + '</div><span class="star-label"><strong>' + val + '</strong>/4 → <strong>' + contrib + '</strong> pts</span></div>' +
       '</div>';
   }
-  document.getElementById('criteriaList').innerHTML = html;
+  document.getElementById('criteriaList').innerHTML = out;
 }
 
-function team_esc(s) {
-  // Only escape backslash and single quote for use inside JS onclick single-quoted string
-  return String(s).replace(/\/g,'\\').replace(/'/g,"\'");
-}
+
 
 // ── RESULT ──
 function renderTeamResult() {
