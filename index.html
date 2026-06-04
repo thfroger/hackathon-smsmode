@@ -419,13 +419,17 @@ let activeTeam  = TEAMS[0];
 let allScores   = {};  // allScores[juror][team][criterionKey] = 0-4
 
 // ── NAVIGATION ──
-function showScreen(id) {
+function showScreen(id, scroll) {
   ['loginScreen','teamPickerScreen','juryScreen','adminScreen'].forEach(s => {
     document.getElementById(s).classList.remove('active');
   });
   const el = document.getElementById(id);
   el.classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (scroll === 'top') {
+    window.scrollTo({ top: 0 });
+  } else if (scroll === 'smooth') {
+    setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30);
+  }
 }
 
 function slideTo(fromId, toId) { showScreen(toId); }
@@ -439,13 +443,13 @@ function login(name) {
 
   if (name === 'ADMIN') {
     headerRight.innerHTML = `<span class="juror-badge">★ Admin</span><button class="logout-btn" onclick="logout()">Déconnexion</button>`;
-    slideTo('loginScreen', 'adminScreen');
+    showScreen('adminScreen', 'smooth');
     startAdminListener();
 
   } else {
     headerRight.innerHTML = `<span class="juror-badge">${name}</span><button class="logout-btn" onclick="logout()">Déconnexion</button>`;
     document.getElementById('pickerTitle').textContent = `Bonjour ${name} 👋`;
-    slideTo('loginScreen', 'teamPickerScreen');
+    showScreen('teamPickerScreen', 'smooth');
     startJuryListener(name);
 
   }
@@ -453,7 +457,7 @@ function login(name) {
 
 function selectTeam(teamName) {
   activeTeam = teamName;
-  slideTo('teamPickerScreen', 'juryScreen');
+  showScreen('juryScreen', 'top');
   document.getElementById('scoringTeamTitle').textContent = teamName;
   document.getElementById('jurySubtitle').textContent = 'Note chaque critère de 1 à 4 étoiles';
   renderCriteria();
@@ -461,14 +465,14 @@ function selectTeam(teamName) {
 }
 
 function backToPicker() {
-  slideBack('juryScreen', 'teamPickerScreen');
+  showScreen('teamPickerScreen', 'top');
   renderTeamPicker();
 }
 
 function logout() {
   currentUser = null;
   activeTeam = TEAMS[0];
-  showScreen('loginScreen');
+  showScreen('loginScreen', 'top');
   document.getElementById('headerRight').innerHTML = '';
 }
 
