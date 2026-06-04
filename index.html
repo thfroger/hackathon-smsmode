@@ -55,13 +55,18 @@ header {
 .logout-btn:hover { color: var(--accent); border-color: var(--accent); }
 
 /* ── SCREENS ── */
-.screen { display: none; }
-.screen.active { display: block; }
+.screen { display: none !important; }
+.screen.active { display: block !important; }
 
 /* ── LOGIN ── */
 #loginScreen {
-  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  min-height: 100vh;
   padding: 2rem;
+}
+#loginScreen.active {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 }
 .login-box {
   background: var(--surface); border: 1px solid var(--border2);
@@ -86,7 +91,7 @@ header {
 .juror-btn.admin-btn:hover { background: rgba(212,160,74,0.15); }
 
 /* ── JURY APP ── */
-#juryScreen { max-width: 700px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+#juryScreen { max-width: 700px; margin: 0 auto; padding: 2rem 2rem 4rem; }
 .page-title { font-family: 'Space Mono', monospace; font-size: 20px; margin-bottom: 4px; }
 .page-sub { font-size: 13px; color: var(--muted); margin-bottom: 1.5rem; }
 
@@ -161,7 +166,7 @@ header {
 .progress-fill { height: 100%; background: var(--accent2); border-radius: 99px; transition: width 0.3s; }
 
 /* ── ADMIN ── */
-#adminScreen { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+#adminScreen { max-width: 960px; margin: 0 auto; padding: 2rem 2rem 4rem; }
 .admin-title { font-family: 'Space Mono', monospace; font-size: 20px; margin-bottom: 4px; }
 .admin-sub { font-size: 13px; color: var(--muted); margin-bottom: 2rem; }
 
@@ -225,7 +230,7 @@ header {
 }
 
 /* ── TEAM PICKER ── */
-#teamPickerScreen { max-width: 700px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+#teamPickerScreen { max-width: 960px; margin: 0 auto; padding: 2rem 2rem 4rem; }
 .picker-title { font-family: 'Space Mono', monospace; font-size: 20px; margin-bottom: 6px; }
 .picker-sub { font-size: 13px; color: var(--muted); margin-bottom: 2rem; }
 .teams-grid {
