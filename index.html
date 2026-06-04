@@ -630,7 +630,7 @@ function renderCriteria() {
       for (let n = 1; n <= 4; n++) {
         const active = val >= n ? ' active' : '';
         const star = val >= n ? '★' : '☆';
-        stars += '<button class="star-btn' + active + '" onclick="setScore('' + esc(activeTeam) + '','' + c.key + '',' + n + ')">' + star + '</button>';
+                stars += '<button class="star-btn' + active + '" onclick="setScore(&quot;' + esc(activeTeam) + '&quot;,&quot;' + c.key + '&quot;,' + n + ')">' + star + '</button>';
       }
       html += '<div class="criterion">' +
         '<div class="criterion-head">' +
