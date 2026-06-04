@@ -267,6 +267,25 @@ function getBadge(score) {
   return               {text:'À améliorer',  bg:'rgba(230,51,41,0.15)',  color:'#e63329', border:'rgba(230,51,41,0.3)'};
 }
 
+// ── EVENT DELEGATION (mobile-safe) ──
+document.addEventListener('click', function(e) {
+  // Team picker buttons
+  var teamBtn = e.target.closest('[data-team]');
+  if (teamBtn) {
+    var idx = parseInt(teamBtn.getAttribute('data-team'));
+    selectTeam(TEAMS[idx]);
+    return;
+  }
+  // Star buttons
+  var starBtn = e.target.closest('[data-key][data-n]');
+  if (starBtn) {
+    var key = starBtn.getAttribute('data-key');
+    var n   = parseInt(starBtn.getAttribute('data-n'));
+    setScore(activeTeam, key, n);
+    return;
+  }
+});
+
 // ── NAVIGATION ──
 function showScreen(id) {
   var screens = ['loginScreen','teamPickerScreen','juryScreen','adminScreen'];
@@ -346,7 +365,7 @@ function renderTeamPicker() {
       score += (ts[CRITERIA[j].key] || 0) * CRITERIA[j].weight;
     }
     score = score * 5;
-    html += '<button class="team-pick-btn' + (done ? ' done' : '') + '" onclick="selectTeam(' + "'" + t + "')" + '">';
+    html += '<button class="team-pick-btn' + (done ? ' done' : '') + '" data-team="' + i + '">';
     html += '<span class="team-pick-name">' + esc(t) + '</span>';
     html += '<span class="team-pick-status"><span class="dot' + (done ? ' green' : '') + '"></span>' + (done ? 'Noté' : 'À noter') + '</span>';
     if (done) html += '<span class="team-pick-score">' + score.toFixed(2) + ' / 20</span>';
