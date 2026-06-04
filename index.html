@@ -462,7 +462,7 @@ const TEAM_INFO = {
   },
   'Équipe 5': {
     members: ['Karim IBRAHIMI','Yanniss BOUZID','César ORTIZ','Anthony ROVERE NJERI','Thomas ROBIN'],
-    subject: 'Workflow builder — Une interface permettant de scénariser une conversation : « Si l\'utilisateur clique sur A, alors envoi de message X ».'
+    subject: 'Workflow builder — Une interface permettant de scénariser une conversation : « Si l'utilisateur clique sur A, alors envoi de message X ».'
   },
   'Équipe 6': {
     members: ['Jérémie NAGI','Hatim OUAADI','Marwan ROUISSI','Tristan EL BASRI','Séverine AUBUT'],
@@ -470,7 +470,7 @@ const TEAM_INFO = {
   },
   'Équipe 7': {
     members: ['Audrey CHIARAMONTE','Yang ZHENG','Kathleen CHAIFFRE','Jean-Baptiste DHO','Walid ZIANI'],
-    subject: 'Workflow builder — Une interface permettant de scénariser une conversation : « Si l\'utilisateur clique sur A, alors envoi de message X ».'
+    subject: 'Workflow builder — Une interface permettant de scénariser une conversation : « Si l'utilisateur clique sur A, alors envoi de message X ».'
   },
   'Équipe 8': {
     members: ['Mehdi BERRAHO','Alexandre CHEVALIER','Matan AZIZA','Willyam RIBIERE','Sébastien LUCAS'],
@@ -529,8 +529,14 @@ function login(name) {
 function selectTeam(teamName) {
   activeTeam = teamName;
   showScreen('juryScreen', 'top');
-  document.getElementById('scoringTeamTitle').textContent = teamName;
-  document.getElementById('jurySubtitle').textContent = 'Note chaque critère de 1 à 4 étoiles';
+  // Populate team info card
+  const info = TEAM_INFO[teamName] || { members: [], subject: '' };
+  const membersHTML = info.members.map(m => `<span class="member-chip">${esc(m)}</span>`).join('');
+  document.getElementById('teamInfoCard').innerHTML = `
+    <div class="team-info-name">${esc(teamName)}</div>
+    <div class="team-info-subject">💡 ${esc(info.subject)}</div>
+    <div class="team-info-members">${membersHTML}</div>
+  `;
   renderCriteria();
   renderTeamResult();
 }
