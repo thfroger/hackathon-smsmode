@@ -462,7 +462,7 @@ const TEAM_INFO = {
   },
   'Équipe 5': {
     members: ['Karim IBRAHIMI','Yanniss BOUZID','César ORTIZ','Anthony ROVERE NJERI','Thomas ROBIN'],
-    subject: 'Workflow builder — Une interface permettant de scénariser une conversation : « Si l'utilisateur clique sur A, alors envoi de message X ».'
+    subject: 'Workflow builder — Une interface permettant de scénariser une conversation : « Si l\'utilisateur clique sur A, alors envoi de message X ».'
   },
   'Équipe 6': {
     members: ['Jérémie NAGI','Hatim OUAADI','Marwan ROUISSI','Tristan EL BASRI','Séverine AUBUT'],
@@ -470,7 +470,7 @@ const TEAM_INFO = {
   },
   'Équipe 7': {
     members: ['Audrey CHIARAMONTE','Yang ZHENG','Kathleen CHAIFFRE','Jean-Baptiste DHO','Walid ZIANI'],
-    subject: 'Workflow builder — Une interface permettant de scénariser une conversation : « Si l'utilisateur clique sur A, alors envoi de message X ».'
+    subject: 'Workflow builder — Une interface permettant de scénariser une conversation : « Si l\'utilisateur clique sur A, alors envoi de message X ».'
   },
   'Équipe 8': {
     members: ['Mehdi BERRAHO','Alexandre CHEVALIER','Matan AZIZA','Willyam RIBIERE','Sébastien LUCAS'],
@@ -527,18 +527,26 @@ function login(name) {
 }
 
 function selectTeam(teamName) {
-  activeTeam = teamName;
-  showScreen('juryScreen', 'top');
-  // Populate team info card
-  const info = TEAM_INFO[teamName] || { members: [], subject: '' };
-  const membersHTML = info.members.map(m => `<span class="member-chip">${esc(m)}</span>`).join('');
-  document.getElementById('teamInfoCard').innerHTML = `
-    <div class="team-info-name">${esc(teamName)}</div>
-    <div class="team-info-subject">💡 ${esc(info.subject)}</div>
-    <div class="team-info-members">${membersHTML}</div>
-  `;
-  renderCriteria();
-  renderTeamResult();
+  try {
+    activeTeam = teamName;
+    showScreen('juryScreen', 'top');
+
+    // Team info card
+    const info = TEAM_INFO[teamName] || { members: [], subject: '' };
+    let membersHTML = '';
+    for (let i = 0; i < info.members.length; i++) {
+      membersHTML += '<span class="member-chip">' + esc(info.members[i]) + '</span>';
+    }
+    document.getElementById('teamInfoCard').innerHTML =
+      '<div class="team-info-name">' + esc(teamName) + '</div>' +
+      '<div class="team-info-subject">💡 ' + esc(info.subject) + '</div>' +
+      '<div class="team-info-members">' + membersHTML + '</div>';
+
+    renderCriteria();
+    renderTeamResult();
+  } catch(e) {
+    alert('Erreur selectTeam: ' + e.message);
+  }
 }
 
 function backToPicker() {
@@ -609,30 +617,37 @@ function renderTeamPicker() {
 
 // ── JURY: criteria ──
 function renderCriteria() {
-  const juror = currentUser;
-  const teamScores = allScores[juror]?.[activeTeam] || {};
-  const list = document.getElementById('criteriaList');
-  list.innerHTML = CRITERIA.map(c => {
-    const val = teamScores[c.key] || 0;
-    const contrib = (val * c.weight * 5).toFixed(2);
-    const stars = [1,2,3,4].map(n => `
-      <button class="star-btn ${val >= n ? 'active' : ''}"
-        onclick="setScore('${esc(activeTeam)}','${c.key}',${n})">
-        ${val >= n ? '★' : '☆'}
-      </button>`).join('');
-    return `
-      <div class="criterion">
-        <div class="criterion-head">
-          <span class="criterion-name">${c.name}</span>
-          <span class="criterion-badge">${Math.round(c.weight*100)}%</span>
-        </div>
-        <div class="criterion-desc">${c.desc}</div>
-        <div class="stars-row">
-          <div class="stars">${stars}</div>
-          <span class="star-label"><strong>${val}</strong>/4 → <strong>${contrib}</strong> pts</span>
-        </div>
-      </div>`;
-  }).join('');
+  try {
+    const juror = currentUser;
+    const teamScores = (allScores[juror] && allScores[juror][activeTeam]) ? allScores[juror][activeTeam] : {};
+    const list = document.getElementById('criteriaList');
+    let html = '';
+    for (let i = 0; i < CRITERIA.length; i++) {
+      const c = CRITERIA[i];
+      const val = teamScores[c.key] || 0;
+      const contrib = (val * c.weight * 5).toFixed(2);
+      let stars = '';
+      for (let n = 1; n <= 4; n++) {
+        const active = val >= n ? ' active' : '';
+        const star = val >= n ? '★' : '☆';
+        stars += '<button class="star-btn' + active + '" onclick="setScore('' + esc(activeTeam) + '','' + c.key + '',' + n + ')">' + star + '</button>';
+      }
+      html += '<div class="criterion">' +
+        '<div class="criterion-head">' +
+          '<span class="criterion-name">' + esc(c.name) + '</span>' +
+          '<span class="criterion-badge">' + Math.round(c.weight * 100) + '%</span>' +
+        '</div>' +
+        '<div class="criterion-desc">' + esc(c.desc) + '</div>' +
+        '<div class="stars-row">' +
+          '<div class="stars">' + stars + '</div>' +
+          '<span class="star-label"><strong>' + val + '</strong>/4 → <strong>' + contrib + '</strong> pts</span>' +
+        '</div>' +
+        '</div>';
+    }
+    list.innerHTML = html;
+  } catch(e) {
+    alert('Erreur renderCriteria: ' + e.message);
+  }
 }
 
 function renderTeamResult() {
