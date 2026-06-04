@@ -55,36 +55,8 @@ header {
 .logout-btn:hover { color: var(--accent); border-color: var(--accent); }
 
 /* ── SCREENS ── */
-/* Slide transition */
-.screens-wrapper {
-  display: flex;
-  width: 100%;
-  overflow: hidden;
-}
-.screen {
-  min-width: 100%;
-  width: 100%;
-  flex-shrink: 0;
-  display: block;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateX(60px);
-  transition: opacity 0.35s ease, transform 0.35s ease;
-  position: absolute;
-  top: 0; left: 0;
-}
-.screen.active {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateX(0);
-  position: relative;
-}
-.screen.slide-out {
-  opacity: 0;
-  transform: translateX(-60px);
-  pointer-events: none;
-  position: absolute;
-}
+.screen { display: none; }
+.screen.active { display: block; }
 
 /* ── LOGIN ── */
 #loginScreen {
@@ -350,8 +322,6 @@ header {
 </header>
 
 <!-- SCREENS -->
-<div style="position:relative; min-height:100vh;">
-
 <!-- LOGIN -->
 <div id="loginScreen" class="screen active">
   <div class="login-box">
@@ -443,52 +413,18 @@ let currentUser = null;
 let activeTeam  = TEAMS[0];
 let allScores   = {};  // allScores[juror][team][criterionKey] = 0-4
 
-// ── SLIDE TRANSITION ──
-function slideTo(fromId, toId) {
-  const from = document.getElementById(fromId);
-  const to   = document.getElementById(toId);
-  if (from) {
-    from.classList.add('slide-out');
-    from.classList.remove('active');
-    setTimeout(() => { from.classList.remove('slide-out'); }, 400);
-  }
-  if (to) {
-    to.style.transform = 'translateX(60px)';
-    to.style.opacity   = '0';
-    to.classList.add('active');
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        to.style.transform = '';
-        to.style.opacity   = '';
-      });
-    });
-  }
+// ── NAVIGATION ──
+function showScreen(id) {
+  ['loginScreen','teamPickerScreen','juryScreen','adminScreen'].forEach(s => {
+    document.getElementById(s).classList.remove('active');
+  });
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function slideBack(fromId, toId) {
-  const from = document.getElementById(fromId);
-  const to   = document.getElementById(toId);
-  if (from) {
-    from.style.transform = 'translateX(60px)';
-    from.style.opacity   = '0';
-    setTimeout(() => {
-      from.classList.remove('active');
-      from.style.transform = '';
-      from.style.opacity   = '';
-    }, 350);
-  }
-  if (to) {
-    to.classList.add('active');
-    to.style.transform = 'translateX(-60px)';
-    to.style.opacity   = '0';
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        to.style.transform = '';
-        to.style.opacity   = '';
-      });
-    });
-  }
-}
+function slideTo(fromId, toId) { showScreen(toId); }
+function slideBack(fromId, toId) { showScreen(toId); }
 
 // ── AUTH ──
 function login(name) {
@@ -500,17 +436,13 @@ function login(name) {
     headerRight.innerHTML = `<span class="juror-badge">★ Admin</span><button class="logout-btn" onclick="logout()">Déconnexion</button>`;
     slideTo('loginScreen', 'adminScreen');
     startAdminListener();
-    setTimeout(() => {
-      document.getElementById('adminScreen').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 50);
+
   } else {
     headerRight.innerHTML = `<span class="juror-badge">${name}</span><button class="logout-btn" onclick="logout()">Déconnexion</button>`;
     document.getElementById('pickerTitle').textContent = `Bonjour ${name} 👋`;
     slideTo('loginScreen', 'teamPickerScreen');
     startJuryListener(name);
-    setTimeout(() => {
-      document.getElementById('teamPickerScreen').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 50);
+
   }
 }
 
@@ -531,16 +463,7 @@ function backToPicker() {
 function logout() {
   currentUser = null;
   activeTeam = TEAMS[0];
-  ['juryScreen','teamPickerScreen','adminScreen'].forEach(id => {
-    const el = document.getElementById(id);
-    el.classList.remove('active');
-    el.style.transform = '';
-    el.style.opacity   = '';
-  });
-  const login = document.getElementById('loginScreen');
-  login.style.transform = 'translateX(0)';
-  login.style.opacity   = '1';
-  login.classList.add('active');
+  showScreen('loginScreen');
   document.getElementById('headerRight').innerHTML = '';
 }
 
